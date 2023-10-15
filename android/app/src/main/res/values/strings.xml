@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ADHFit</string>
+ <string name="facebook_app_id">809879410826195</string>
+ <string name="facebook_client_token">bfd54faaea983f724f0a42d8581be8f1</string>
+ <!-- <string name="fb_login_protocol_scheme">fb1234</string> -->
+
+
+
+
+</resources>
