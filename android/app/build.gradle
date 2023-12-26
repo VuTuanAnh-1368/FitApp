@@ -97,6 +97,9 @@ android {
             keyPassword 'android'
         }
     }
+    packagingOptions {
+        exclude 'com/google/firebase/iid/FirebaseInstanceIdReceiver.class'
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -129,13 +132,33 @@ dependencies {
     }
 
 
-    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
+    // implementation(platform("com.google.firebase:firebase-bom:32.4.1"))
+    // implementation("com.google.firebase:firebase-analytics-ktx")    
+    // implementation 'com.google.firebase:firebase-core:16.0.0'
+
     
 
-     implementation 'com.facebook.android:facebook-login:latest.release'
+    implementation 'com.facebook.android:facebook-login:latest.release'
     implementation project(':react-native-fbsdk-next')
     //     implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+
+    implementation project(':react-native-splash-screen')
+
+    implementation project(':react-native-notifications')
+    
+     implementation(project(':react-native-maps')){
+      exclude group: 'com.google.android.gms'
+  }
+    implementation 'com.google.android.gms:play-services-base:18.0.1'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
+  implementation project(':react-native-bluetooth-classic')
+      implementation project(':react-native-push-notification')
+0
+
+
+
+
 
 
 

@@ -17,7 +17,9 @@ const Donutchart = (props) => {
   const radius = `${props.radius}`;
   const circleCircumference = 2 * Math.PI * radius;
 
-  const percentage = (spentAmount / targetAmount) * 100;
+  const percentage = ((spentAmount / targetAmount) * 100) > 100 ? 100 : ((spentAmount / targetAmount) * 100)
+
+
   const strokeDashoffset =
     circleCircumference - (circleCircumference * percentage) / 100;
 

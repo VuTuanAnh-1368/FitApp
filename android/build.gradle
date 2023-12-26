@@ -3,23 +3,56 @@
 buildscript {
     ext {
         buildToolsVersion = "33.0.0"
-        minSdkVersion = 21
+        minSdkVersion = 30
         compileSdkVersion = 33
         targetSdkVersion = 33
         // facebookSdkVersion = "13.1.0"
         // googlePlayServicesAuthVersion = "20.7.0"
+        // playServicesVersion = "17.0.0" //
+        // googlePlayServicesVersion = "20.0.0" 
+        // androidmapsutilsversion = "2.2.3"
+        // playServicesVersion="18.1.0"
+        // androidMapsUtilsVersion="3.7.0"
+        // supportLibVersion="27.1.0"
+
 
 
         // We use NDK 23 which has both M1 support and is the side-by-side NDK version from AGP.
         ndkVersion = "23.1.7779620"
+
+        // RNMapboxMapsImpl = 'mapbox'
+
     }
     repositories {
-        google()
         mavenCentral()
+        google()
+        maven { url 'https://jitpack.io' }
+        // maven {
+        //     url 'https://api.mapbox.com/downloads/v2/releases/maven'
+        //     authentication {
+        //         basic(BasicAuthentication)
+        //     }
+        //     credentials {
+        //         // Do not change the username below.
+        //         // This should always be `mapbox` (not your username).
+        //         username = 'mapbox'
+        //         // Use the secret token you stored in gradle.properties as the password
+        //         password = 'pk.eyJ1IjoiZ2JtaGlldTEyMyIsImEiOiJjbG95MmZxYXUxYWFpMmpudmozbTVwZWdsIn0.zqK0XIMx-pl0DIOtv9bjjg'
+        //     }
+        // }
     }
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.google.gms:google-services:4.4.0'
+    }
+}
+allprojects {
+    repositories {
+        // Other repositories...
+        maven {
+          // react-native-background-fetch
+         url("${project(':react-native-background-fetch').projectDir}/libs")
+    }
     }
 }

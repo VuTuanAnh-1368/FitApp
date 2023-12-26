@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView, Text, Image, Dimensions, TouchableOpacity, ImageBackground, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import Entypo from 'react-native-vector-icons/Entypo'
 import Donutchart from '../../components/Donutchart';
-import Rectanchart from './Rectanchart';
+import Rectanchart from '../../components/Rectanchart';
 import BaarChart2 from '../../components/Baarchart2';
+import { useNavigation } from '@react-navigation/native';
+import { ROUTES } from '../../../constants';
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux"
+import moment from 'moment';
+import api from '../../api';
+
 
 const currentTime = new Date();
 const day = currentTime.getDay();          // Thứ trong tuần, nhung tra ve cac gia tri 0-6
@@ -16,19 +23,131 @@ const isHighlightFri = day === 5;
 const isHighlightSat = day === 6;
 const isHighlightSun = day === 0;
 const Steps = () => {
+    const navigation = useNavigation();
+    // const daysInWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    // const data = [3000, 4000, 600, 2000, 1000, 920, 1200]; // Dữ liệu của biểu đ0ồ
+    // const timeStampForWeek = []
+    const currentDate = moment();
+    const monday = moment(currentDate).startOf('isoWeek');
+    const timeStampForWeek = Array.from({ length: 7 }, (_, index) =>
+        moment(monday).add(index, 'days').startOf('day').unix() * 1000
+    );
 
-    const data = [3000, 4000, 600, 2000, 1000, 920, 1200]; // Dữ liệu của biểu đồ
+    // console.log(timeStampForWeek);
+    const [stepInWeek, setStepInWeek] = useState([])
+    const [targetStep, setTargetStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(null);
+    const [currentKCals, setCurrentKcals] = useState(null);
+    const [currentDistance, setCurrentDistance] = useState(null);
+    const [currentTimeRecord, setCurrentTimeRecord] = useState(null);
+    const [timeIntervalGetStateData, setTimeIntervalGetStateData] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [distanceFootRate, setDistanceFootRate] = useState(null);
 
+
+    useEffect(() => {
+        const loadData = async () => {
+            let ud = await utils.AsyncStorage.getItem('user_id');
+            await api.UserAPI.userGetAllStateData({
+                'objectId': ud
+            })
+                .then(response => {
+                    // console.log(response.data.data.days)
+                    if (response.data.data.days) {
+                        const newStepInWeek = Array.from({ length: 7 }, (_, index) => {
+                            const dayTimestamp = timeStampForWeek[index];
+                            const matchingDataItem = response.data.data.days.find(item => parseInt(item.day, 10) === dayTimestamp);
+
+                            return matchingDataItem ? matchingDataItem.step : 0;
+                        });
+
+                        setStepInWeek(newStepInWeek);
+                    }
+
+                })
+                .catch(err =>
+                    console.log(err))
+        }
+        loadData()
+    }, [])
+
+    useEffect(() => {
+
+        const loadData = async () => {
+            let userId = await utils.AsyncStorage.getItem('user_id');
+
+            api.UserAPI.handleGetUserInformation({
+                "user_id": userId
+            })
+                .then(
+                    (response) => {
+                        if (response.data.success === true) {
+                            if (response?.data?.userInfo?.avatar != '') {
+                                setTargetStep(response?.data?.userInfo?.targetStep);
+                                setDistanceFootRate(response?.data?.userInfo?.distanceFootRate)
+                            }
+                        }
+                    }
+                )
+                .catch(error => {
+                    console.log(error)
+                })
+
+        }
+
+
+        const getStateData = async () => {
+            let ud = null;
+            if (userId == null) {
+                ud = await utils.AsyncStorage.getItem('user_id');
+                setUserId(ud);
+            }
+            await api.UserAPI.handleGetStateDataFollowDay({
+                'objectId': userId == null ? ud : userId
+            })
+                .then(response => {
+                    // console.log(response?.data);
+                    if (response?.data) {
+                        if (response?.data?.todayInfo != {}) {
+                            setCurrentStep(response?.data?.todayInfo?.step);
+                            setCurrentKcals(response?.data?.todayInfo?.kcal);
+                            setCurrentDistance(response?.data?.todayInfo?.distance);
+                            // setCurrentHeartRate(response?.data?.todayInfo?.heartRate?.currentHeartRate);
+
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+        }
+        getStateData();
+        loadData();
+        const intervalId = setInterval(() => {
+            getStateData()
+        }, 1000);
+
+        setTimeIntervalGetStateData(intervalId);
+
+        return () => {
+            if (timeIntervalGetStateData) {
+                clearInterval(timeIntervalGetStateData);
+            }
+        };
+
+    }, []);
     const hei = Dimensions.get("window").height;
     const wi = Dimensions.get("window").width;
+    const stylesLightDark = useSelector((state) => state.settings.styles);
+    const { t } = useTranslation();
     return (
-        <SafeAreaView>
+        <View>
             <ImageBackground
                 source={require('../../assets/images/Layer1.png')}
                 style={{
                     height: Dimensions.get("window").height,
                     width: Dimensions.get("window").width,
-                    alignItems: 'center'
+                    alignItems: 'center', ...stylesLightDark.background
                 }}>
                 <View
                     style={{
@@ -36,17 +155,25 @@ const Steps = () => {
                         height: hei / 12,
                         width: wi,
                         alignItems: 'center'
-                    }}
-                >
-                    <Entypo
-                        name='chevron-left'
-                        size={34}></Entypo>
+                    }}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (timeIntervalGetStateData) {
+                                clearInterval(timeIntervalGetStateData);
+                            }
+                            navigation.navigate(ROUTES.HOME_TAB)
+                        }}
+                    >
+                        <Entypo
+                            name='chevron-left'
+                            size={34}></Entypo>
+                    </TouchableOpacity>
                     <Text
                         style={{
                             color: 'black',
                             fontSize: 24,
-                            marginLeft: 5,
-                        }}>Steps</Text>
+                            marginLeft: 5, ...stylesLightDark.text
+                        }}>{t('stepsKcals')}</Text>
                 </View>
                 <View
                     style={{
@@ -67,10 +194,10 @@ const Steps = () => {
                     }}>
                         <Text
                             style={{
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: 'white',
                                 fontFamily: 'Montserrat-Regular',
-                            }}>Goal:5000</Text>
+                            }}>Goal:{targetStep}</Text>
                         <View style={styles.arrow} />
                     </View>
                     <View
@@ -80,7 +207,7 @@ const Steps = () => {
                             marginTop: 20,
                             //    backgroundColor: 'green',
                         }}>
-                        <Donutchart radius={81.6} target={5000} spent={4204} text="Steps" colorTarget='#d2dee4' colorAmount="#3263ff" strokeTarget="17" strokeAmount="17" colorText='black' fontText={12}>
+                        <Donutchart radius={81.6} target={targetStep} spent={currentStep} text="Steps" colorTarget='#d2dee4' colorAmount="#3263ff" strokeTarget="17" strokeAmount="17" colorText='black' fontText={15}>
                         </Donutchart>
                         <Image
                             source={require('../../assets/icons/run.png')}
@@ -138,61 +265,44 @@ const Steps = () => {
                         style={{
                             width: 325,
                             height: 120,
-                            //   backgroundColor: 'blue',
+                            // backgroundColor: 'blue',
                             flexDirection: 'row',
                             position: 'relative',
                             bottom: 50,
                         }}>
-                        <Rectanchart top={0} left={10} colorTarget="#cfdee4" colorAmount="#ff2777"></Rectanchart>
-                        <Rectanchart top={30} left={46} colorTarget="#cfdee4" colorAmount="#68ffcb"></Rectanchart>
-                        <Rectanchart top={0} left={46} colorTarget="#cfdee4" colorAmount="#9340FC"></Rectanchart>
+                        <Rectanchart top={30} left={30} colorTarget="#cfdee4" colorAmount="#ff2777"></Rectanchart>
+                        <Rectanchart top={30} left={120} colorTarget="#cfdee4" colorAmount="#68ffcb"></Rectanchart>
                         <Image
                             source={require("../../assets/icons/Asset5.png")}
                             style={{
                                 position: 'absolute',
-                                left: 36,
-                                top: 24,
+                                left: 55,
+                                top: 55,
                             }}></Image>
                         <Image
                             source={require("../../assets/icons/Asset3.png")}
                             style={{
                                 position: 'absolute',
-                                left: 153,
-                                top: 54,
+                                left: 248,
+                                top: 55,
                             }}></Image>
-                        <Image
-                            source={require("../../assets/icons/Asset4.png")}
-                            style={{
-                                position: 'absolute',
-                                height: 18,
-                                width: 18,
-                                left: 270,
-                                top: 24,
-                            }}></Image>
+
                         <Text
                             style={{
                                 backgroundColor: '#FFB1AC',
                                 position: 'absolute',
-                                fontSize: 11,
-                                top: 80,
-                                left: 24,
-                            }}>100 kcal</Text>
-                        <Text
-                            style={{
-                                backgroundColor: '#FFB1AC',
-                                position: 'absolute',
-                                fontSize: 11,
+                                fontSize: 15,
                                 top: 110,
-                                left: 145,
-                            }}>1.2km</Text>
+                                left: 46,
+                            }}>{currentKCals} cal</Text>
                         <Text
                             style={{
                                 backgroundColor: '#FFB1AC',
                                 position: 'absolute',
-                                fontSize: 11,
-                                top: 80,
-                                left: 266,
-                            }}>1.3h</Text>
+                                fontSize: 15,
+                                top: 110,
+                                left: 240,
+                            }}>{currentDistance} m</Text>
                     </View>
                 </View>
                 <View
@@ -217,44 +327,10 @@ const Steps = () => {
                             style={{
                                 fontSize: 18,
                                 backgroundColor: '#FFB1AC'
-                            }}>Current progress</Text>
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            style={{
-                                backgroundColor: "#D9D9D9",
-                                height: 40,
-                                width: 108,
-                                borderRadius: 10,
-                                marginLeft: 50,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                marginTop: 5,
-                            }}>
-                            <Image
-                                source={require("../../assets/icons/Asset6.png")}
-                                style={{
-                                    height: 26,
-                                    width: 26,
-                                    marginLeft: 5,
-                                    marginTop: 2,
-                                }}>
-                            </Image>
-                            <Text
-                                style={{
-                                    fontSize: 12,
-                                    fontWeight: 'bold',
-                                    marginLeft: 5,
-                                }}>Weekly</Text>
-                            <Image
-                                source={require("../../assets/icons/Asset7.png")}
-                                style={{
-                                    marginLeft: 5,
-                                    marginTop: 2,
-                                }}
-                            ></Image>
-                        </TouchableOpacity>
+                            }}>{t('currentProgress')}</Text>
+
                     </View>
-                    <BaarChart2 data={data}></BaarChart2>
+                    <BaarChart2 data={stepInWeek}></BaarChart2>
                     <View
                         style={{
                             flexDirection: 'row',
@@ -306,7 +382,7 @@ const Steps = () => {
                     </View>
                 </View>
             </ImageBackground>
-        </SafeAreaView >
+        </View>
     );
 }
 

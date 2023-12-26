@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1076954851180",
-    "project_id": "adhfit-ddb6d",
-    "storage_bucket": "adhfit-ddb6d.appspot.com"
+    "project_number": "48566040248",
+    "project_id": "adhfit-6ab11",
+    "storage_bucket": "adhfit-6ab11.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1076954851180:android:59cb5d8ebd47c531b93549",
+        "mobilesdk_app_id": "1:48566040248:android:7593ab72d25dc4fbc5664d",
         "android_client_info": {
           "package_name": "com.adhfit"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAdqzjJAHRmue7jItIfKp-_5_pwjtmw91Q"
+          "current_key": "AIzaSyC01Kyd8_5bAORz-ENOADfkZcxETLd2UOA"
         }
       ],
       "services": {

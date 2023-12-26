@@ -43,6 +43,8 @@ export default class CalendarPickerButton extends Component {
                     nextTitle={' '}
                     previousTitle={' '}
                     scrollable={'true'}
+                    maxDate={this.props?.maxDatePicker === 'today' ? today : null}
+
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignContent: 'center', marginTop: 4 }}>
                     <Text onPress={this.onCloseCalendar}>Close</Text>

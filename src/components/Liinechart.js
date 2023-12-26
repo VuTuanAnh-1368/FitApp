@@ -17,15 +17,15 @@ const Liinechart = (props) => {
     <LineChart
       data={props.data}
       //data={dataSleep}           Cái này để chạy dữ liệu mẫu, có props thì ko cần cái này.
-      width={300}
-      height={200}
+      width={props.width}
+      height={props.height}
       verticalLabelRotation={30}
       chartConfig={{
         backgroundGradientFrom: props.backgroundGradient,
         backgroundGradientFromOpacity: 0,                    //Opacity = 0 rồi thật ra ko cần truyền màu cũng được, mờ 100% - cái chart sẽ màu cái chứa nó.
         backgroundGradientTo: props.backgroundGradient,   // Nền cũng để màu chạy tuyến tính đc nma t thấy ko thích nên để 1 cái màu thôi.
         backgroundGradientToOpacity: 0,
-        color: (opacity = 1) => `rgb(65, 101, 229)`,
+        color: (opacity = 1) => props.colorLine,
         labelColor: (opacity = 1) => `rgb(255, 255, 255)`,
         strokeWidth: 4, // optional, default 3
         barPercentage: 0.5,
@@ -35,7 +35,7 @@ const Liinechart = (props) => {
         fillShadowGradientTo: props.fillShadowGradientTo,
         fillShadowGradientToOpacity: props.Opacity,
       }}
-      bezier
+      bezier={true}
       withInnerLines={false}
       withOuterLines={false}
       style={{
